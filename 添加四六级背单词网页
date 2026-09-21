@@ -1,0 +1,186 @@
+index.html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四六级单词卡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+        body {
+            background-color: #f0f4f8;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .progress {
+            background: #ddd;
+            border-radius: 10px;
+            height: 10px;
+            margin:12px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #2563eb;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 50px 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            text-align:center;
+            min-height:320px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+        }
+        .word {
+            font-size: 36px;
+            font-weight:bold;
+            color:#111;
+            margin-bottom:20px;
+        }
+        .meaning {
+            font-size:22px;
+            color:#444;
+            min-height:60px;
+        }
+        .btns-group {
+            margin-top:35px;
+            display:flex;
+            gap:12px;
+            justify-content:center;
+            flex-wrap:wrap;
+        }
+        button {
+            padding:12px 20px;
+            border:none;
+            border-radius:10px;
+            font-size:16px;
+            cursor:pointer;
+            transition:0.2s;
+        }
+        .btn-show {
+            background:#2563eb;
+            color:white;
+        }
+        .btn-prev {
+            background:#6b7280;
+            color:white;
+        }
+        .btn-next {
+            background:#10b981;
+            color:white;
+        }
+        .btn-know {
+            background:#f59e0b;
+            color:white;
+        }
+        button:hover{
+            opacity:0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>四六级单词卡</h1>
+            <div id="progress-text">进度：0 / 0</div>
+            <div class="progress">
+                <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="word" id="word">word</div>
+            <div class="meaning" id="meaning" style="visibility:hidden;">释义</div>
+            <div class="btns-group">
+                <button class="btn-show" id="btnShow">显示释义</button>
+                <button class="btn-prev" id="btnPrev">上一个</button>
+                <button class="btn-next" id="btnNext">下一个</button>
+                <button class="btn-know" id="btnKnow">已熟悉</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 四六级单词库，可以自行继续扩充
+        const wordList = [
+            {word: "abandon", meaning: "v.抛弃，放弃"},
+            {word: "ability", meaning: "n.能力，才能"},
+            {word: "abnormal", meaning: "adj.反常的，异常的"},
+            {word: "abolish", meaning: "v.废除，废止"},
+            {word: "abundant", meaning: "adj.大量的，丰盛的"},
+            {word: "accelerate", meaning: "v.加速，促进"},
+            {word: "accompany", meaning: "v.陪伴；伴随"},
+            {word: "accomplish", meaning: "v.完成，实现"},
+            {word: "adequate", meaning: "adj.足够的；适当的"},
+            {word: "analyze", meaning: "v.分析，研究"}
+        ];
+        let currentIndex = 0;
+        // 读取本地存储，刷新页面不丢失熟悉单词
+        let knownList = JSON.parse(localStorage.getItem('knownWords')) || [];
+        const wordDom = document.getElementById("word");
+        const meaningDom = document.getElementById("meaning");
+        const btnShow = document.getElementById("btnShow");
+        const btnPrev = document.getElementById("btnPrev");
+        const btnNext = document.getElementById("btnNext");
+        const btnKnow = document.getElementById("btnKnow");
+        const progressText = document.getElementById("progress-text");
+        const progressBar = document.getElementById("progress-bar");
+
+        function renderWord() {
+            const item = wordList[currentIndex];
+            wordDom.innerText = item.word;
+            meaningDom.innerText = item.meaning;
+            meaningDom.style.visibility = "hidden";
+            btnShow.innerText = "显示释义";
+            updateProgress();
+        }
+        function updateProgress(){
+            const total = wordList.length;
+            const known = knownList.length;
+            progressText.innerText = `进度：${known}熟悉 / ${total}总词`;
+            progressBar.style.width = `${known/total*100}%`;
+            // 保存到本地存储
+            localStorage.setItem('knownWords', JSON.stringify(knownList));
+        }
+        btnShow.onclick = ()=>{
+            if(meaningDom.style.visibility === "hidden"){
+                meaningDom.style.visibility = "visible";
+                btnShow.innerText = "隐藏释义";
+            }else{
+                meaningDom.style.visibility = "hidden";
+                btnShow.innerText = "显示释义";
+            }
+        }
+        btnNext.onclick = ()=>{
+            currentIndex = (currentIndex + 1) % wordList.length;
+            renderWord();
+        }
+        btnPrev.onclick = ()=>{
+            currentIndex = (currentIndex -1 + wordList.length) % wordList.length;
+            renderWord();
+        }
+        btnKnow.onclick = ()=>{
+            if(!knownList.includes(currentIndex)){
+                knownList.push(currentIndex);
+            }
+            btnNext.click();
+        }
+        renderWord();
+    </script>
+</body>
+</html>
